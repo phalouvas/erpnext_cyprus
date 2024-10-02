@@ -129,5 +129,9 @@ def execute(filters=None):
 	vat_reclaimed_on_purchases = get_vat_reclaimed_on_purchases(company, from_date, to_date, cost_center, cyprus_vat_input_account)
 	row = {"description": "VAT reclaimed in the period for purchases and other inputs (including acquisitions from EU)", "amount": vat_reclaimed_on_purchases}
 	data.append(row)
+
+	net_vat_to_be_paid_or_reclaimed = total_vat_due - vat_reclaimed_on_purchases
+	row = {"description": "Net VAT to be paid or reclaimed", "amount": net_vat_to_be_paid_or_reclaimed}
+	data.append(row)
 	
 	return columns, data
