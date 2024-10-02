@@ -189,6 +189,32 @@ def get_total_value_of_services_supplied_to_eu(company, from_date, to_date, cost
 	total_net_amount = result[0].get('total_net_amount') if result and result[0].get('total_net_amount') is not None else 0
 	return total_net_amount
 
+def get_total_value_of_services_received_excluding_vat(company, from_date, to_date, cost_center):
+	conditions = [
+		"company = %s",
+		"posting_date >= %s",
+		"posting_date <= %s",
+		"status NOT IN ('Cancelled', 'Draft', 'Internal Transfer')",
+		"docstatus = 1",
+		"total_taxes_and_charges = 0",
+		"tax_id IS NOT NULL AND tax_id != ''"
+	]
+	values = [company, from_date, to_date]
+
+	if cost_center:
+		conditions.append("cost_center = %s")
+		values.append(cost_center)
+
+	query = """
+		SELECT SUM(base_net_total) as total_net_amount
+		FROM `tabPurchase Invoice`
+		WHERE {conditions}
+	""".format(conditions=" AND ".join(conditions))
+
+	result = frappe.db.sql(query, values, as_dict=True)
+	total_net_amount = result[0].get('total_net_amount') if result and result[0].get('total_net_amount') is not None else 0
+	return total_net_amount
+
 def execute(filters=None):
 	columns = get_columns()
 	company, from_date, to_date, cost_center, cyprus_vat_output_account, cyprus_vat_input_account = get_filters(filters)
@@ -241,5 +267,9 @@ def execute(filters=None):
 	total_value_of_acquisitions_from_eu = 0
 	row = {"description": "Total value of all acquisitions of goods and related services (excluding any VAT) from other EU member States", "desc_id": "11A", "amount": total_value_of_acquisitions_from_eu}
 	data.append(row)
-	
+
+	total_value_of_services_received_excluding_vat = get_total_value_of_services_received_excluding_vat(company, from_date, to_date, cost_center)
+	row = {"description": "Total value of all services receiving (excluding any VAT)", "desc_id": "11B", "amount": total_value_of_services_received_excluding_vat}
+	data.append(row)
+
 	return columns, data
