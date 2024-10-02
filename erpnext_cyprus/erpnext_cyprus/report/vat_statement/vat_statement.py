@@ -55,7 +55,7 @@ def get_vat_due_on_sales(company, from_date, to_date, cost_center, cyprus_vat_ou
 	""".format(conditions=" AND ".join(conditions))
 
 	result = frappe.db.sql(query, values, as_dict=True)
-	total_credit = result[0].get('total_credit') if result else 0
+	total_credit = result[0].get('total_credit') if result and result[0].get('total_credit') is not None else 0
 	return total_credit
 
 def get_vat_due_on_acquisitions_eu(company, from_date, to_date, cost_center, cyprus_vat_output_account):
@@ -81,7 +81,7 @@ def get_vat_due_on_acquisitions_eu(company, from_date, to_date, cost_center, cyp
 	""".format(conditions=" AND ".join(conditions))
 
 	result = frappe.db.sql(query, values, as_dict=True)
-	total_credit = result[0].get('total_credit') if result else 0
+	total_credit = result[0].get('total_credit') if result and result[0].get('total_credit') is not None else 0
 	return total_credit
 
 def get_vat_reclaimed_on_purchases(company, from_date, to_date, cost_center, cyprus_vat_input_account):
@@ -106,8 +106,31 @@ def get_vat_reclaimed_on_purchases(company, from_date, to_date, cost_center, cyp
 	""".format(conditions=" AND ".join(conditions))
 
 	result = frappe.db.sql(query, values, as_dict=True)
-	total_debit = result[0].get('total_debit') if result else 0
+	total_debit = result[0].get('total_debit') if result and result[0].get('total_debit') is not None else 0
 	return total_debit
+
+def get_total_value_of_sales_excluding_vat(company, from_date, to_date, cost_center):
+	conditions = [
+		"company = %s",
+		"posting_date >= %s",
+		"posting_date <= %s",
+		"docstatus = 1"
+	]
+	values = [company, from_date, to_date]
+
+	if cost_center:
+		conditions.append("cost_center = %s")
+		values.append(cost_center)
+
+	query = """
+		SELECT SUM(base_net_total) as total_net_amount
+		FROM `tabSales Invoice`
+		WHERE {conditions}
+	""".format(conditions=" AND ".join(conditions))
+
+	result = frappe.db.sql(query, values, as_dict=True)
+	total_net_amount = result[0].get('total_net_amount') if result and result[0].get('total_net_amount') is not None else 0
+	return total_net_amount
 
 def execute(filters=None):
 	columns = get_columns()
@@ -132,6 +155,10 @@ def execute(filters=None):
 
 	net_vat_to_be_paid_or_reclaimed = total_vat_due - vat_reclaimed_on_purchases
 	row = {"description": "Net VAT to be paid or reclaimed", "amount": net_vat_to_be_paid_or_reclaimed}
+	data.append(row)
+
+	total_value_of_sales_excluding_vat = get_total_value_of_sales_excluding_vat(company, from_date, to_date, cost_center)
+	row = {"description": "Total value of sales and other outputs excluding any VAT (including the amounts in boxes 8A, 8B, 9, 10 and 11B)", "amount": total_value_of_sales_excluding_vat}
 	data.append(row)
 	
 	return columns, data
