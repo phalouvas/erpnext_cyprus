@@ -22,6 +22,11 @@ def get_columns():
 			"width": 800,
 		},
 		{
+			"label": _("#"),
+			"fieldtype": "Data",
+			"fieldname": "desc_id"
+		},
+		{
 			"label": _("Amount"),
 			"fieldtype": "Currency",
 			"fieldname": "amount",
@@ -163,31 +168,35 @@ def execute(filters=None):
 	data = []
 	
 	vat_due_on_sales = get_vat_due_on_sales(company, from_date, to_date, cost_center, cyprus_vat_output_account)
-	row = {"description": "VAT due in the period on sales and other outputs", "amount": vat_due_on_sales}
+	row = {"description": "VAT due in the period on sales and other outputs", "desc_id": "1", "amount": vat_due_on_sales}
 	data.append(row)
 	
 	vat_due_on_acquisitions_eu = get_vat_due_on_acquisitions_eu(company, from_date, to_date, cost_center, cyprus_vat_output_account)
-	row = {"description": "VAT due in the period on the acquisitions from other EU Members States", "amount": vat_due_on_acquisitions_eu}
+	row = {"description": "VAT due in the period on the acquisitions from other EU Members States", "desc_id": "2", "amount": vat_due_on_acquisitions_eu}
 	data.append(row)
 
 	total_vat_due = vat_due_on_sales + vat_due_on_acquisitions_eu
-	row = {"description": "Total VAT due", "amount": total_vat_due}
+	row = {"description": "Total VAT due", "desc_id": "3", "amount": total_vat_due}
 	data.append(row)
 
 	vat_reclaimed_on_purchases = get_vat_reclaimed_on_purchases(company, from_date, to_date, cost_center, cyprus_vat_input_account)
-	row = {"description": "VAT reclaimed in the period for purchases and other inputs (including acquisitions from EU)", "amount": vat_reclaimed_on_purchases}
+	row = {"description": "VAT reclaimed in the period for purchases and other inputs (including acquisitions from EU)", "desc_id": "4", "amount": vat_reclaimed_on_purchases}
 	data.append(row)
 
 	net_vat_to_be_paid_or_reclaimed = total_vat_due - vat_reclaimed_on_purchases
-	row = {"description": "Net VAT to be paid or reclaimed", "amount": net_vat_to_be_paid_or_reclaimed}
+	row = {"description": "Net VAT to be paid or reclaimed", "desc_id": "5", "amount": net_vat_to_be_paid_or_reclaimed}
 	data.append(row)
 
 	total_value_of_sales_excluding_vat = get_total_value_of_sales_excluding_vat(company, from_date, to_date, cost_center)
-	row = {"description": "Total value of sales and other outputs excluding any VAT (including the amounts in boxes 8A, 8B, 9, 10 and 11B)", "amount": total_value_of_sales_excluding_vat}
+	row = {"description": "Total value of sales and other outputs excluding any VAT (including the amounts in boxes 8A, 8B, 9, 10 and 11B)", "desc_id": "6", "amount": total_value_of_sales_excluding_vat}
 	data.append(row)
 
 	total_value_of_purchases_excluding_vat = get_total_value_of_purchases_excluding_vat(company, from_date, to_date, cost_center)
-	row = {"description": "Total value of purchases and other inputs excluding any VAT (including the amounts in box 11A and 11B)", "amount": total_value_of_purchases_excluding_vat}
+	row = {"description": "Total value of purchases and other inputs excluding any VAT (including the amounts in box 11A and 11B)", "desc_id": "7", "amount": total_value_of_purchases_excluding_vat}
+	data.append(row)
+
+	total_value_of_supply_of_goods_and_services_to_eu = 0
+	row = {"description": "Total value of supply of goods and related services (excluding VAT) to other Member States", "desc_id": "8A", "amount": total_value_of_supply_of_goods_and_services_to_eu}
 	data.append(row)
 	
 	return columns, data
