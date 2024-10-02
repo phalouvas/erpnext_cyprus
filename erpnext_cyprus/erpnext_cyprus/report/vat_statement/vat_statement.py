@@ -24,7 +24,8 @@ def get_columns():
 		{
 			"label": _("#"),
 			"fieldtype": "Data",
-			"fieldname": "desc_id"
+			"fieldname": "desc_id",
+			"width": 50,
 		},
 		{
 			"label": _("Amount"),
@@ -235,6 +236,10 @@ def execute(filters=None):
 
 	total_value_of_out_of_scope_sales = total_value_of_sales_excluding_vat - total_value_of_services_supplied_to_eu
 	row = {"description": "Total value of out of scope sales, with right of deduction of input tax (other than those included in box 8B)", "desc_id": "10", "amount": total_value_of_out_of_scope_sales}
+	data.append(row)
+
+	total_value_of_acquisitions_from_eu = 0
+	row = {"description": "Total value of all acquisitions of goods and related services (excluding any VAT) from other EU member States", "desc_id": "11A", "amount": total_value_of_acquisitions_from_eu}
 	data.append(row)
 	
 	return columns, data
