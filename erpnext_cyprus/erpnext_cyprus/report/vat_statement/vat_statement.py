@@ -228,5 +228,13 @@ def execute(filters=None):
 	total_value_of_services_supplied_to_eu = get_total_value_of_services_supplied_to_eu(company, from_date, to_date, cost_center)
 	row = {"description": "Total value of services supplied (excluding VAT) to other Member States", "desc_id": "8B", "amount": total_value_of_services_supplied_to_eu}
 	data.append(row)
+
+	total_value_of_zero_rated_supplies = 0
+	row = {"description": "Total value of outputs on zero-rated supplies (other than those included in box 8A)", "desc_id": "9", "amount": total_value_of_zero_rated_supplies}
+	data.append(row)
+
+	total_value_of_out_of_scope_sales = total_value_of_sales_excluding_vat - total_value_of_services_supplied_to_eu
+	row = {"description": "Total value of out of scope sales, with right of deduction of input tax (other than those included in box 8B)", "desc_id": "10", "amount": total_value_of_out_of_scope_sales}
+	data.append(row)
 	
 	return columns, data
