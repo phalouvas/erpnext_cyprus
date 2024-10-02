@@ -114,6 +114,7 @@ def get_total_value_of_sales_excluding_vat(company, from_date, to_date, cost_cen
 		"company = %s",
 		"posting_date >= %s",
 		"posting_date <= %s",
+		"status NOT IN ('Cancelled', 'Draft', 'Internal Transfer')",
 		"docstatus = 1"
 	]
 	values = [company, from_date, to_date]
@@ -125,6 +126,30 @@ def get_total_value_of_sales_excluding_vat(company, from_date, to_date, cost_cen
 	query = """
 		SELECT SUM(base_net_total) as total_net_amount
 		FROM `tabSales Invoice`
+		WHERE {conditions}
+	""".format(conditions=" AND ".join(conditions))
+
+	result = frappe.db.sql(query, values, as_dict=True)
+	total_net_amount = result[0].get('total_net_amount') if result and result[0].get('total_net_amount') is not None else 0
+	return total_net_amount
+
+def get_total_value_of_purchases_excluding_vat(company, from_date, to_date, cost_center):
+	conditions = [
+		"company = %s",
+		"posting_date >= %s",
+		"posting_date <= %s",
+		"status NOT IN ('Cancelled', 'Draft', 'Internal Transfer')",
+		"docstatus = 1"
+	]
+	values = [company, from_date, to_date]
+
+	if cost_center:
+		conditions.append("cost_center = %s")
+		values.append(cost_center)
+
+	query = """
+		SELECT SUM(base_net_total) as total_net_amount
+		FROM `tabPurchase Invoice`
 		WHERE {conditions}
 	""".format(conditions=" AND ".join(conditions))
 
@@ -159,6 +184,10 @@ def execute(filters=None):
 
 	total_value_of_sales_excluding_vat = get_total_value_of_sales_excluding_vat(company, from_date, to_date, cost_center)
 	row = {"description": "Total value of sales and other outputs excluding any VAT (including the amounts in boxes 8A, 8B, 9, 10 and 11B)", "amount": total_value_of_sales_excluding_vat}
+	data.append(row)
+
+	total_value_of_purchases_excluding_vat = get_total_value_of_purchases_excluding_vat(company, from_date, to_date, cost_center)
+	row = {"description": "Total value of purchases and other inputs excluding any VAT (including the amounts in box 11A and 11B)", "amount": total_value_of_purchases_excluding_vat}
 	data.append(row)
 	
 	return columns, data
