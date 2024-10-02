@@ -10,7 +10,8 @@ def get_filters(filters):
 	to_date = filters.get("to_date")
 	cost_center = filters.get("cost_center")
 	cyprus_vat_output_account = filters.get("cyprus_vat_output_account")
-	return company, from_date, to_date, cost_center, cyprus_vat_output_account
+	cyprus_vat_input_account = filters.get("cyprus_vat_input_account")
+	return company, from_date, to_date, cost_center, cyprus_vat_output_account, cyprus_vat_input_account
 
 def get_columns():
 	columns = [
@@ -18,7 +19,7 @@ def get_columns():
 			"label": _("Description"),
 			"fieldtype": "Data",
 			"fieldname": "description",
-			"width": 500,
+			"width": 800,
 		},
 		{
 			"label": _("Amount"),
@@ -38,17 +39,14 @@ def get_vat_due_on_sales(company, from_date, to_date, cost_center, cyprus_vat_ou
 		"posting_date <= %s",
 		"is_cancelled = 0",
 		"credit > 0",
+		"account = %s",
 		"voucher_type != 'Purchase Invoice'"
 	]
-	values = [company, from_date, to_date]
+	values = [company, from_date, to_date, cyprus_vat_output_account]
 
 	if cost_center:
 		conditions.append("cost_center = %s")
 		values.append(cost_center)
-
-	if cyprus_vat_output_account:
-		conditions.append("account = %s")
-		values.append(cyprus_vat_output_account)
 
 	query = """
 		SELECT SUM(credit) as total_credit
@@ -67,17 +65,14 @@ def get_vat_due_on_acquisitions_eu(company, from_date, to_date, cost_center, cyp
 		"posting_date <= %s",
 		"is_cancelled = 0",
 		"credit > 0",
+		"account = %s",
 		"voucher_type = 'Purchase Invoice'"
 	]
-	values = [company, from_date, to_date]
+	values = [company, from_date, to_date, cyprus_vat_output_account]
 
 	if cost_center:
 		conditions.append("cost_center = %s")
 		values.append(cost_center)
-
-	if cyprus_vat_output_account:
-		conditions.append("account = %s")
-		values.append(cyprus_vat_output_account)
 
 	query = """
 		SELECT SUM(credit) as total_credit
@@ -89,9 +84,34 @@ def get_vat_due_on_acquisitions_eu(company, from_date, to_date, cost_center, cyp
 	total_credit = result[0].get('total_credit') if result else 0
 	return total_credit
 
+def get_vat_reclaimed_on_purchases(company, from_date, to_date, cost_center, cyprus_vat_input_account):
+	conditions = [
+		"company = %s",
+		"posting_date >= %s",
+		"posting_date <= %s",
+		"is_cancelled = 0",
+		"debit > 0",
+		"account = %s"
+	]
+	values = [company, from_date, to_date, cyprus_vat_input_account]
+
+	if cost_center:
+		conditions.append("cost_center = %s")
+		values.append(cost_center)
+
+	query = """
+		SELECT SUM(debit) as total_debit
+		FROM `tabGL Entry`
+		WHERE {conditions}
+	""".format(conditions=" AND ".join(conditions))
+
+	result = frappe.db.sql(query, values, as_dict=True)
+	total_debit = result[0].get('total_debit') if result else 0
+	return total_debit
+
 def execute(filters=None):
 	columns = get_columns()
-	company, from_date, to_date, cost_center, cyprus_vat_output_account = get_filters(filters)
+	company, from_date, to_date, cost_center, cyprus_vat_output_account, cyprus_vat_input_account = get_filters(filters)
 	data = []
 	
 	vat_due_on_sales = get_vat_due_on_sales(company, from_date, to_date, cost_center, cyprus_vat_output_account)
@@ -104,6 +124,10 @@ def execute(filters=None):
 
 	total_vat_due = vat_due_on_sales + vat_due_on_acquisitions_eu
 	row = {"description": "Total VAT due", "amount": total_vat_due}
+	data.append(row)
+
+	vat_reclaimed_on_purchases = get_vat_reclaimed_on_purchases(company, from_date, to_date, cost_center, cyprus_vat_input_account)
+	row = {"description": "VAT reclaimed in the period for purchases and other inputs (including acquisitions from EU)", "amount": vat_reclaimed_on_purchases}
 	data.append(row)
 	
 	return columns, data

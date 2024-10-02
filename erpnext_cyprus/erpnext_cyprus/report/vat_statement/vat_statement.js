@@ -36,6 +36,13 @@ frappe.query_reports["VAT Statement"] = {
 			fieldtype: "Link",
 			options: "Account",
 			reqd: 1
+		},
+		{
+			fieldname: "cyprus_vat_input_account",
+			label: __("Cyprus VAT Input Account"),
+			fieldtype: "Link",
+			options: "Account",
+			reqd: 1
 		}
 	]
 };
