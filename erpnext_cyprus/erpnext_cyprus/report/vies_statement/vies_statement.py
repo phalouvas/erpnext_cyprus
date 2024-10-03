@@ -8,7 +8,8 @@ def get_filters(filters):
 	company = filters.get("company")
 	date_range = filters.get("date_range")
 	from_date, to_date = date_range if date_range else (None, None)
-	return company, from_date, to_date
+	cost_center = filters.get("cost_center")
+	return company, from_date, to_date, cost_center
 
 def get_columns():
 	columns = [
@@ -54,7 +55,7 @@ def get_columns():
 	 
 	return columns
 
-def get_vies_entries(company, from_date, to_date):
+def get_vies_entries(company, from_date, to_date, cost_center):
 	conditions = [
 		"company = %s",
 		"posting_date >= %s",
@@ -65,6 +66,10 @@ def get_vies_entries(company, from_date, to_date):
 		"tax_id IS NOT NULL AND tax_id != ''"
 	]
 	values = [company, from_date, to_date]
+
+	if cost_center:
+		conditions.append("cost_center = %s")
+		values.append(cost_center)
 
 	query = """
 		SELECT name, customer, posting_date, tax_id, grand_total, ROUND(grand_total) as rounded_grand_total
@@ -77,9 +82,9 @@ def get_vies_entries(company, from_date, to_date):
 
 def execute(filters=None):
 	columns = get_columns()
-	company, from_date, to_date = get_filters(filters)
+	company, from_date, to_date, cost_center = get_filters(filters)
 	data = []
 
-	data = get_vies_entries(company, from_date, to_date)
+	data = get_vies_entries(company, from_date, to_date, cost_center)
 
 	return columns, data
