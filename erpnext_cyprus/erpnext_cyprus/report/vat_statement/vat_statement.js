@@ -12,17 +12,11 @@ frappe.query_reports["VAT Statement"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date",
-			reqd: 1
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date",
-			reqd: 1
-		},
+            fieldname: "date_range",
+            label: __("Date Range"),
+            fieldtype: "DateRange",
+            reqd: 1
+        },
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
