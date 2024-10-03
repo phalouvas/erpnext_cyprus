@@ -1,7 +1,7 @@
 // Copyright (c) 2024, KAINOTOMO PH LTD and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["VAT Statement"] = {
+frappe.query_reports["VIES Statement"] = {
 	"filters": [
 		{
 			fieldname: "company",
@@ -23,20 +23,6 @@ frappe.query_reports["VAT Statement"] = {
 			fieldtype: "Link",
 			options: "Cost Center",
 			reqd: 0
-		},
-		{
-			fieldname: "cyprus_vat_output_account",
-			label: __("Cyprus VAT Output Account"),
-			fieldtype: "Link",
-			options: "Account",
-			reqd: 1
-		},
-		{
-			fieldname: "cyprus_vat_input_account",
-			label: __("Cyprus VAT Input Account"),
-			fieldtype: "Link",
-			options: "Account",
-			reqd: 1
 		}
 	]
 };

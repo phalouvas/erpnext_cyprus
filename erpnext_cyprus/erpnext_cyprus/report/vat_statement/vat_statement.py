@@ -5,13 +5,13 @@ import frappe
 from frappe import _
 
 def get_filters(filters):
-	company = filters.get("company")
-	from_date = filters.get("from_date")
-	to_date = filters.get("to_date")
-	cost_center = filters.get("cost_center")
-	cyprus_vat_output_account = filters.get("cyprus_vat_output_account")
-	cyprus_vat_input_account = filters.get("cyprus_vat_input_account")
-	return company, from_date, to_date, cost_center, cyprus_vat_output_account, cyprus_vat_input_account
+    company = filters.get("company")
+    date_range = filters.get("date_range")
+    from_date, to_date = date_range if date_range else (None, None)
+    cost_center = filters.get("cost_center")
+    cyprus_vat_output_account = filters.get("cyprus_vat_output_account")
+    cyprus_vat_input_account = filters.get("cyprus_vat_input_account")
+    return company, from_date, to_date, cost_center, cyprus_vat_output_account, cyprus_vat_input_account
 
 def get_columns():
 	columns = [

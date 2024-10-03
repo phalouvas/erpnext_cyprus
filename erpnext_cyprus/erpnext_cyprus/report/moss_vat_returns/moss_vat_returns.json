@@ -1,0 +1,85 @@
+{
+ "add_total_row": 1,
+ "columns": [
+  {
+   "fieldname": "Tax Account",
+   "fieldtype": "Data",
+   "label": "Tax Account",
+   "width": 0
+  },
+  {
+   "fieldname": "Subtotal",
+   "fieldtype": "Currency",
+   "label": "Subtotal",
+   "width": 0
+  },
+  {
+   "fieldname": "Sales Tax",
+   "fieldtype": "Currency",
+   "label": "Sales Tax",
+   "width": 0
+  },
+  {
+   "fieldname": "Total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "width": 0
+  },
+  {
+   "fieldname": "Tax Percentage",
+   "fieldtype": "Int",
+   "label": "Tax Percentage",
+   "width": 0
+  }
+ ],
+ "creation": "2024-10-03 06:46:26.506424",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "KAINOTOMO PH LTD",
+ "letterhead": null,
+ "modified": "2024-10-03 06:46:26.506424",
+ "modified_by": "Administrator",
+ "module": "Erpnext Cyprus",
+ "name": "MOSS VAT Returns",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT \r\n  `tabSales Taxes and Charges`.`account_head` AS `Tax Account`, \r\n  SUM(`tabSales Invoice`.`base_net_total`) AS `Subtotal`, \r\n  SUM(`tabSales Taxes and Charges`.`tax_amount`) AS `Sales Tax`, \r\n  SUM(`tabSales Invoice`.`grand_total`) AS `Total`,\r\n  ROUND((SUM(`tabSales Taxes and Charges`.`tax_amount`) / SUM(`tabSales Invoice`.`base_net_total`) * 100), 0) AS `Tax Percentage`\r\nFROM \r\n  `tabSales Invoice` \r\nLEFT JOIN \r\n  `tabSales Taxes and Charges` \r\nON \r\n  `tabSales Invoice`.`name` = `tabSales Taxes and Charges`.`parent` \r\nWHERE \r\n  `tabSales Invoice`.`posting_date` BETWEEN %(start_date)s AND %(end_date)s \r\nAND \r\n  `tabSales Taxes and Charges`.`account_head` != '490050 - VAT Cyprus - KAI' \r\nAND \r\n  `tabSales Taxes and Charges`.`account_head` != 'GBR - United Kingdom - KAI' \r\nGROUP BY \r\n  `tabSales Taxes and Charges`.`account_head`\r\n",
+ "ref_doctype": "Sales Invoice",
+ "report_name": "MOSS VAT Returns",
+ "report_script": "",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Auditor"
+  },
+  {
+   "role": "Employee Self Service"
+  }
+ ],
+ "timeout": 0
+}
