@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"oN-X6Oc0lN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Cyprus Localization</span>\",\"col\":12}},{\"id\":\"Dr70CviUBW\",\"type\":\"card\",\"data\":{\"card_name\":\"Quarterly Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"oN-X6Oc0lN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Cyprus Localization</span>\",\"col\":12}},{\"id\":\"AhNfV37IdT\",\"type\":\"card\",\"data\":{\"card_name\":\"Monthly Reports\",\"col\":4}},{\"id\":\"Dr70CviUBW\",\"type\":\"card\",\"data\":{\"card_name\":\"Quarterly Reports\",\"col\":4}}]",
  "creation": "2024-10-03 06:37:39.602574",
  "custom_blocks": [],
  "docstatus": 0,
@@ -41,9 +41,28 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Monthly Reports",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "VIES Statement",
+   "link_count": 0,
+   "link_to": "VIES Statement",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2024-10-03 06:50:39.334161",
+ "modified": "2024-10-03 07:05:06.298445",
  "modified_by": "Administrator",
  "module": "Erpnext Cyprus",
  "name": "Cyprus Localization",
