@@ -19,7 +19,7 @@ bench --site your-site.local install-app erpnext_cyprus
 
 ## Requirements
 
-- ERPNext v15
+- ERPNext v16
 
 ## Tax Account Setup
 
