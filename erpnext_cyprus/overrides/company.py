@@ -8,6 +8,9 @@ from erpnext_cyprus.utils.customer_group_assignment import assign_customer_terri
 class CustomCompany(Company):
 	@frappe.whitelist()
 	def create_default_tax_template(self):
+		if self.country != "Cyprus" or self._is_test_company():
+			return super().create_default_tax_template()
+
 		company_name = self.name
 		setup_tax_template(company_name)
 		setup_tax_rules(company_name)
@@ -15,8 +18,10 @@ class CustomCompany(Company):
 		assign_customer_group_territory()
 	
 	def create_default_accounts(self):
-		if self.country == "Cyprus":
-			custom_chart = cyprus_coa()
+		if self.country != "Cyprus" or self._is_test_company():
+			return super().create_default_accounts()
+
+		custom_chart = cyprus_coa()
 		
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
@@ -34,6 +39,9 @@ class CustomCompany(Company):
 			"default_payable_account",
 			frappe.db.get_value("Account", {"company": self.name, "account_type": "Payable", "is_group": 0}),
 		)
+
+	def _is_test_company(self):
+		return str(self.name or "").startswith("_Test")
 
 def setup_tax_template(company_name):
 
