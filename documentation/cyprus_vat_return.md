@@ -110,6 +110,10 @@ The Cyprus VAT Return report includes the following boxes:
 2. **Box 2**: VAT due on acquisitions from EU countries
    - Reports VAT due under reverse charge for EU acquisitions
    - Represents the output portion of the reverse charge mechanism
+   - **Three-tier calculation**:
+     1. *Primary*: Reverse-charge output VAT from Purchase Invoice tax rows (Deduct type on Output VAT account) for EU supplier invoices
+     2. *Fallback*: If no PI tax rows exist and EU acquisitions are present (Box 11A + Box 11B > 0), computes VAT as `fallback_rate × (Box 11A + Box 11B)`
+     3. *Adjustment*: Adds marked Journal Entry adjustments (net credits with `VAT-RC-ADJ` marker) on the Output VAT account
 
 3. **Box 3**: Total VAT due (sum of boxes 1 and 2)
    - Total output VAT liability for the period
@@ -118,6 +122,12 @@ The Cyprus VAT Return report includes the following boxes:
    - Reports input VAT paid on domestic purchases and expenses
    - Includes VAT reclaimed on imports and EU acquisitions
    - Includes adjustments for debit notes
+   - **Five-component calculation**:
+     1. *Sales GL*: Input VAT from Sales Invoice credit notes (via GL entries on Input VAT account)
+     2. *Purchase GL*: Input VAT from domestic Purchase Invoices with GL postings
+     3. *PI Tax Rows*: Reverse-charge input VAT from EU acquisition Purchase Invoice tax rows (Add type on Input VAT account)
+     4. *Fallback mirror*: If PI tax rows are empty and EU acquisitions exist, adds mirror fallback amount
+     5. *JE Adjustment*: Adds marked Journal Entry adjustments (net debits with `VAT-RC-ADJ` marker) on the Input VAT account
 
 5. **Box 5**: Net VAT to be paid or reclaimed
    - The difference between Box 3 and Box 4
@@ -177,6 +187,50 @@ Key points to understand:
    - Mismatch between VAT return and your VIES statements
    - Missing reverse charge entries for EU acquisitions
    - Incorrect tax templates applied to transactions
+   - EU suppliers without `supplier_address` set — these transactions are excluded from Box 11A/11B
+
+## Calculation Details
+
+### Reverse-Charge VAT (Box 2 and Box 4 components)
+
+For EU acquisitions using Reverse Charge tax templates, the report uses a three-tier calculation:
+
+1. **PI Tax Rows (Primary)**: Reads directly from the `Purchase Taxes and Charges` child table for each Purchase Invoice where the supplier is in an EU country. Deduct rows on the Output VAT account contribute to Box 2; Add rows on the Input VAT account contribute to Box 4.
+
+2. **Fallback**: When Purchase Invoices use a Reverse Charge template but have no actual tax rows applied (`taxes: []`), the report computes the reverse-charge VAT as:
+   ```
+   fallback_rate × (Box 11A + Box 11B)
+   ```
+   The fallback rate is derived from the company's Purchase Taxes and Charges Template (Reverse Charge) if available, defaulting to 19% (Cyprus standard rate).
+
+3. **JE Adjustments**: Journal Entries with the marker prefix `VAT-RC-ADJ` in the Remark field are included as adjustment layer. The report filters by:
+   - `voucher_type = 'Journal Entry'`
+   - `docstatus = 1` (submitted)
+   - `account` = selected Output or Input VAT account
+   - `remark LIKE 'VAT-RC-ADJ:%'`
+
+### JE Marker Policy
+
+To include manual corrections in the VAT return:
+- Create a Journal Entry with lines on the appropriate VAT accounts
+- Add the marker prefix `VAT-RC-ADJ:` in the Journal Entry **Remark** field
+- Example: `VAT-RC-ADJ: Correction for Q1 2026`
+- Journal Entries without this marker are **excluded** from adjustment totals
+
+### Diagnostics and Pre-Filing Checks
+
+The report shows diagnostic warnings at the bottom when potential data quality issues are detected:
+
+| Diagnostic | Severity | Description |
+|------------|----------|-------------|
+| Empty PI tax rows | Warning | PI uses Reverse Charge template but tax rows are empty → fallback used |
+| Missing supplier address | Warning | EU supplier PI without `supplier_address` → excluded from Box 11A/11B |
+| Box 2 = 0 with EU acquisitions | Warning | Box 11A+11B > 0 but Box 2 is zero → check templates and master data |
+| Unmarked JE candidates | Warning | JE on VAT accounts without `VAT-RC-ADJ` marker → excluded from totals |
+
+### Fallback Deprecation
+
+The fallback (tier 2) using `rate × (Box 11A + Box 11B)` is a **transitional mechanism** to handle cases where Reverse Charge tax templates are selected on Purchase Invoices but tax rows are not applied. It should be phased out once all EU acquisition Purchase Invoices consistently have populated tax rows.
 
 ## Filing Requirements
 

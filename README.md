@@ -92,7 +92,7 @@ The app automatically configures Cyprus-specific payroll components:
 
 ## Support
 
-For issues and feature requests, please create an issue on the [GitHub repository](https://github.com/phalouvas/erpnext_cyprus/issues).
+For issues and feature requests, please create an issue on the [GitHub repository](https://github.com/kainotomo/erpnext_cyprus/issues).
 
 ## License
 
