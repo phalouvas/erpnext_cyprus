@@ -526,17 +526,17 @@ def get_box_11a(company, from_date, to_date):
 	# Format for SQL IN clause
 	placeholder_list = ', '.join(['%s'] * len(eu_countries))
 	
-	# Build query for goods (non-services) from EU countries
+	# Build query for goods (non-services) from EU countries using supplier country
 	query = """
 		SELECT SUM(pii.base_net_amount) as amount
 		FROM `tabPurchase Invoice` pi
 		INNER JOIN `tabPurchase Invoice Item` pii ON pi.name = pii.parent
-		LEFT JOIN `tabAddress` addr ON pi.supplier_address = addr.name
+		LEFT JOIN `tabSupplier` sup ON pi.supplier = sup.name
 		LEFT JOIN `tabItem` item ON pii.item_code = item.name
 		WHERE pi.posting_date BETWEEN %s AND %s
 		AND pi.company = %s
 		AND pi.docstatus = 1
-		AND addr.country IN ({0})
+		AND sup.country IN ({0})
 		AND (item.custom_is_service IS NULL OR item.custom_is_service = 0)
 	""".format(placeholder_list)
 	
@@ -554,17 +554,17 @@ def get_box_11b(company, from_date, to_date):
 	# Format for SQL IN clause
 	placeholder_list = ', '.join(['%s'] * len(eu_countries))
 	
-	# Build query using same pattern as get_box_8b but for purchase invoices
+	# Build query for services from EU countries using supplier country
 	query = """
 		SELECT SUM(pii.base_net_amount) as amount
 		FROM `tabPurchase Invoice` pi
 		INNER JOIN `tabPurchase Invoice Item` pii ON pi.name = pii.parent
-		LEFT JOIN `tabAddress` addr ON pi.supplier_address = addr.name
+		LEFT JOIN `tabSupplier` sup ON pi.supplier = sup.name
 		LEFT JOIN `tabItem` item ON pii.item_code = item.name
 		WHERE pi.posting_date BETWEEN %s AND %s
 		AND pi.company = %s
 		AND pi.docstatus = 1
-		AND addr.country IN ({0})
+		AND sup.country IN ({0})
 		AND item.custom_is_service = 1
 	""".format(placeholder_list)
 	
@@ -640,11 +640,11 @@ def get_reverse_charge_tax_amount(company, from_date, to_date, vat_account, add_
 		FROM `tabPurchase Taxes and Charges` ptc
 		INNER JOIN `tabPurchase Invoice` pi ON ptc.parent = pi.name
 			AND ptc.parenttype = 'Purchase Invoice'
-		LEFT JOIN `tabAddress` addr ON pi.supplier_address = addr.name
+		LEFT JOIN `tabSupplier` sup ON pi.supplier = sup.name
 		WHERE pi.posting_date BETWEEN %s AND %s
 		AND pi.company = %s
 		AND pi.docstatus = 1
-		AND addr.country IN ({placeholders})
+		AND sup.country IN ({placeholders})
 		AND ptc.account_head = %s
 		AND ptc.add_deduct_tax = %s
 	"""
