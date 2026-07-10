@@ -62,7 +62,7 @@ When creating sales invoices for EU B2B customers:
    - Include the note "VAT Reverse Charge" on the invoice
 
 3. For each transaction, ensure:
-   - Invoice has "Paid" status to appear in the VIES report
+   - Invoice is submitted (docstatus = 1) to appear in the VIES report
    - Customer's Tax ID is correctly entered
    - Invoice includes all required information for EU cross-border compliance
    - Amount is correctly calculated and rounded as needed
@@ -74,20 +74,28 @@ When creating sales invoices for EU B2B customers:
 
 ## Report Interpretation
 
-The VIES Statement report provides:
+The VIES Statement report provides customer-aggregated totals:
 
-- **Sales Invoice**: The invoice number for reference
 - **Customer**: The name of the EU business customer
-- **Posting Date**: When the transaction was posted
+- **Country**: The customer's country (derived from the `customer_address` field on the invoice)
 - **Tax ID**: The customer's VAT registration number
-- **Amount**: The net value of goods/services supplied
-- **Rounded Amount**: The amount rounded according to reporting requirements
+- **Net Total**: Sum of net values of all invoices for this customer in the selected period
+- **Rounded Net Total**: Sum of individually rounded net values
 
-This breakdown helps you:
-- Track all intra-Community supplies by customer
+### Inclusion Criteria
+
+The report includes a Sales Invoice row when all of the following conditions are met:
+- The invoice has been **submitted** (docstatus = 1)
+- The invoice belongs to the selected **company** and **date range**
+- The invoice has **zero total taxes and charges** (zero-rated for VIES purposes)
+- The customer has a **Tax ID** entered (non-empty)
+- The invoice has a **customer address** set with a country in the **EU** (excluding Cyprus)
+
+This output helps you:
+- Prepare for VIES recapitulative statement submission
 - Verify all EU B2B sales have been properly recorded
 - Ensure all transactions have valid Tax IDs
-- Prepare for VIES statement submission
+- Review aggregated totals per customer for monthly or quarterly periods
 
 ## Filing Requirements
 

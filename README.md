@@ -90,6 +90,22 @@ The app automatically configures Cyprus-specific payroll components:
   - GESY (2.65%, uncapped)
   - Income Tax (calculated according to Cyprus tax brackets)
 
+## Testing
+
+Run all tests for this app:
+
+```bash
+bench --site tmp.localhost console <<< '
+import frappe, unittest
+frappe.flags.test_mode = True
+from erpnext_cyprus.erpnext_cyprus.report.cyprus_vies_return.test_cyprus_vies_return import TestCyprusViesReturn
+suite = unittest.TestLoader().loadTestsFromTestCase(TestCyprusViesReturn)
+unittest.TextTestRunner(verbosity=2).run(suite)
+'
+```
+
+This runs the VIES report tests directly without triggering the ERPNext test bootstrap preloader.
+
 ## Support
 
 For issues and feature requests, please create an issue on the [GitHub repository](https://github.com/kainotomo/erpnext_cyprus/issues).

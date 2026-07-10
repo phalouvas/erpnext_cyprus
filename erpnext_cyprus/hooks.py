@@ -5,6 +5,14 @@ app_description = "ERPNext extension for companies in Cyprus."
 app_email = "info@kainotomo.com"
 app_license = "gpl-3.0"
 
+# Before Tests
+# ------------
+# Hook to prepare test environment before running tests.
+# Fixes a known erpnext BootstrapTestData issue where Sales Taxes and Charges
+# Templates with charge_type='Actual' don't set included_in_print_rate=0,
+# causing validation errors in validate_inclusive_tax.
+before_tests = "erpnext_cyprus.utils.test_setup.before_tests"
+
 # Apps
 # ------------------
 

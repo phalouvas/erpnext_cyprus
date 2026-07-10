@@ -59,6 +59,7 @@ def get_data(filters):
 	eu_countries = get_eu_countries()
 	
 	# Query to get sales invoices grouped by customer
+	# Country is derived from the customer_address on the invoice
 	customer_totals = frappe.db.sql(
 		"""
 		SELECT 
